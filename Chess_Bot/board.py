@@ -1,9 +1,9 @@
 import numpy as np
 
-class board:
+class Board:
     def __init__(self):
         """Initialize the board and variables"""
-        self.board = board
+        self.board = self.starting_board()
         self.white_to_play = True
         self.en_passant_square = None   # When a pawn moves forward 2 pieces, set en_passant_square to the square it moved to (row, col)
         self.check = False  # true when the player to play is in check
@@ -48,6 +48,11 @@ class board:
         # KINGS
         board[0][4], board[0][4] = "BK", "BK"
         board[7][4], board[7][4] = "WK", "WK"
+        
+    def checkmated(self):
+        """Returns true if current turn's player is in checkmate"""
+        if not self.check: return False    
+        
 
     def possible_moves(self):
         """
@@ -58,11 +63,7 @@ class board:
         A move is a 3-tuple, containing the piece (e.g. "WP"), the start square, and the end square. Squares are 2-tuples 
             e.g. move = ("WP", (2, 6), (2, 4))      # white's pawn from C2 to C4
         """
-        # If in check, check for mate
-            # If true, return "CHECKMATE"
-        # If in check, check for double check
-        #   If true, you must move the king
-        
+       
         # Check if can castle to either or both sides, if you can, add it/them to list of moves 
             # You can castle iff:
                 # self.castle_rights = True for the side you wish to castle to 
@@ -73,11 +74,11 @@ class board:
             # Eliminate moves that are not actually possible 
                 # Absolute pin
                 # Blocked: Piece occupied by your own square (or opponents in the case of a pawn)
-                #   (not knight) note: if blocked in one square, all squares passed that are also blocked
+                #   -> note for non-knight pieces: if blocked in one square, all squares passed that are also blocked
                 # Move puts you in check (king) or keeps you in check (if in check and the move keeps you in check)
-                # Pawn: No opponent square on your diagonal or no en passant on your diagonal 
+                # Pawn: No opponent square on your diagonal or no en passant possible on your diagonal 
                 
-        # If no moves are possible, return "STALEMATE"
+        # If no moves are possible, return "CHECKMATE" if in check, else "STALEMATE"
     
     def make_move(self, piece, start_square, end_square):
         """Moves piece to the (row, column) position
@@ -102,6 +103,7 @@ class board:
         
         # the following will all increment the above slightly  
             # the amount that they move the above score may need to be learned 
+            # NOTE: You must take into account BOTH SIDES for all of the following, this is zero-sum!
         # 2. King safety -> based on how safe the king is, + or - a certain amount 
             # ideally, king is behind 3 pawns, all pawns on the same rank
             # king is weaker in the center, when on a diagonal of a bishop or queen, or on the file of a rook or queen
