@@ -49,20 +49,15 @@ class board:
         board[0][4], board[0][4] = "BK", "BK"
         board[7][4], board[7][4] = "WK", "WK"
 
-    def possible_moves(self, whites_turn = True, can_en_passant = False):
-        """Returns a list of all possible moves in the board's position
-        A move is a 2-tuple, containing the piece (e.g. "WP") and the square's index (e.g. (2, 4))
-            e.g. move = ("WP", (2, 4))      # white's pawn to C4
+    def possible_moves(self):
         """
-        pass
-    
-    def make_move(self, piece, row, column):
-        """Moves piece to the (row, column) position
+        Returns a list of all possible moves in the board's position (if there are any)
         Returns "CHECKMATE" if in check and no move is possible
         Returns "STALEMATE" if not in check and no move is possible
-        Returns "" if game continues 
-        """
         
+        A move is a 3-tuple, containing the piece (e.g. "WP"), the start square, and the end square. Squares are 2-tuples 
+            e.g. move = ("WP", (2, 6), (2, 4))      # white's pawn from C2 to C4
+        """
         # If in check, check for mate
             # If true, return "CHECKMATE"
         # If in check, check for double check
@@ -83,6 +78,44 @@ class board:
                 # Pawn: No opponent square on your diagonal or no en passant on your diagonal 
                 
         # If no moves are possible, return "STALEMATE"
+    
+    def make_move(self, piece, start_square, end_square):
+        """Moves piece to the (row, column) position
+        ! Assumes move is valid. Should only be called from a move returned in possible_moves
+        """
+        
+        # Set board[start_square] = 'X'
+        # Set board[end_square] = piece
+        # Set en_passant_square to square or None
+        # Set check 
+        # Set castle_rights for current color 
+        # Flip self.white_to_play 
+        
+    def heuristic(self):
+        """Returns the evaluation for the board's current position 
+        Zero-sum: Eval for white = -(Eval for black)
+        """
+        
+        # Maybe: 
+        
+        # 1. Material difference is just material white - material black, don't adjust that
+        
+        # the following will all increment the above slightly  
+            # the amount that they move the above score may need to be learned 
+        # 2. King safety -> based on how safe the king is, + or - a certain amount 
+            # ideally, king is behind 3 pawns, all pawns on the same rank
+            # king is weaker in the center, when on a diagonal of a bishop or queen, or on the file of a rook or queen
+            # king is stronger with pieces near it 
+        # 3. Piece activity 
+            # piece controls more squares, especially those in the center or the opponent's territory (preferable towards king)
+        # 4. Pawn structure 
+            # isolated pawns are bad
+            # doubled pawns are bad 
+        # 5. Space
+            # differential between the number of squares you are attacking on your opponent's side of the board and the number of squares they are attacking on yours.
+        # 6. Bishop pair 
+        # 7. Passed pawn
+    
             
         
         
