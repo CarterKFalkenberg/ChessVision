@@ -1,0 +1,74 @@
+Board centric combined with piece centric 
+board_colors = 8x8 vector of either {BLACK, WHITE, EMPTY}
+board_pieces = 8x8 vector of either {EMPTY, PAWN, ROOK, ...}
+black_pieces = List<Piece>
+white_pieces = List<Piece>
+
+Piece:
+int type = PAWN, ROOK, ...
+    -> each piece has an int representation (use consts for readability)
+bool color = WHITE / BLACK 
+Square square 
+    -> could just use length 2 int vector 
+    -> could just have row and col as seperate attributes 
+OR Piece is a superclass of PAWN, ROOK, ...
+    each of these can have their own methods for how they make moves
+
+Square:
+int row = 0
+int col = 0
+
+----
+How to make a move:
+Say we are moving a white piece Piece from Origin to Destination 
+set board_colors @ Origin -> EMPTY 
+set board_pieces @ Origin -> EMPTY 
+If board_pieces @ Destination not EMPTY:
+    Get black piece Captured int from board_pieces @ Destination
+    Find and remove Captured from black_pieces array 
+Piece.square = Destination 
+set board_colors @ Destination -> WHITE 
+set board_pieces @ Destination -> int representation of PIECE 
+---
+To get possible moves, loop through each piece and get their possible moves
+To get a pieces possible move:
+    - Calculate all theoretically possible moves
+        - e.g. bishop can theoretically move on any square on the diagonals it is on 
+    - Remove all non-possible moves
+        - see comments in possible_moves()
+
+Thought: Have a 8x8 vector (T/F) saying whether or not a square is "seen" by opponent territory 
+    - A piece is "seen" iff it is empty and an opponents piece could move to it (ignoring pins)
+    - use case: check if you are castling through check, calculate space advantage, check pins
+
+How to check if pinned to king:
+    Note: a pin must be either on a diagonal from a bishop or queen or on a vertical/horizontal from a rook or queen
+        Thus, if you are not on the same diagonal or rank or file as the king, you CANNOT be pinned 
+        1. Check if you are on the same diagonal or rank or file as the king 
+        2. If you are, look in all directions until you hit a piece or the edge of the board 
+            If you are going straight and you hit an opponent's queen/rook, you are pinned 
+            If you are going diagonal and you hit an opponent's queen/bishop, you are pinned 
+
+        1. and 2. can actually be done simultaneously:
+            - Look in all 4 pairs of directions, do one pair at a time  
+            - In a BFS manner, search forward/backward at the same time 
+            - For each step: 
+                If you hit the king, set "line_with_king" to be true, stop searching in that direction
+                If you hit an opponent piece that is relevant, set "line_with_opp" to true 
+                If you hit one of your own pieces or index-OB, stop searching this pair, you are not pinned 
+                If line_with_king and line_with_opp is true, you are pinned! Stop searching all pairs, return True
+            - Repeat for each pair (if you find a pin, you don't need to keep searching)
+            - If you make it here, return False, you are not pinned. 
+
+How to check if a move puts you in check:
+    1. If you are moving the king to a square 
+        - Check all 8 directions from that square for relevant pieces 
+        - Check all 4 directions from that square for knights 
+    2. If you are moving a non-king to a square 
+        - Since we dealt with pins, the only way this is possible is if you are already in check 
+    2. i.e. Else If you are in check 
+        - Check all 8 directions from the king for relevant pieces 
+        - Check all 4 directions from the king for knights 
+    Note: Should have a method that takese in a square and color as input and outputs true if that square would be a check if that king was in it 
+
+    
