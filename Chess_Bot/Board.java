@@ -15,4 +15,19 @@ class Board{
     
     }
 
+    int[][] getPossibleMoves(){
+        /*
+         * Returns: List of moves
+            * Move: int[6]:
+            *     0: Color
+            *     1: Piece
+            *     2: start_row 
+            *     3: start_column
+            *     4: end_row
+            *     5: end_column
+         */
+
+        return new int[1][6];
+    }
+
 }
