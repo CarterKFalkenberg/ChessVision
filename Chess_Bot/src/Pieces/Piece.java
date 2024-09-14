@@ -11,13 +11,14 @@ public class Piece {
         this.square = square;
     }
 
-    int getType(){
+    public int getType(){
         return Constants.EMPTY;
     }
-    boolean isWhitePiece(){
+    public boolean isWhitePiece(){
         return this.isWhite;
     }
-    int[] getSquare(){
+
+    public int[] getSquare(){
         return this.square;
     }
     
