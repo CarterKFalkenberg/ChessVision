@@ -2,6 +2,7 @@ package Chess_Bot.src;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import Chess_Bot.src.Pieces.Bishop;
 import Chess_Bot.src.Pieces.King;
@@ -15,7 +16,8 @@ import Chess_Bot.src.Pieces.Rook;
 class Board{
 
     int[][] boardColors;  
-    int[][] boardPieces;
+    int[][] boardPiecesInt;
+    ArrayList<ArrayList<Piece>> boardPiecesObject;
     ArrayList<Piece> whitePieces;
     ArrayList<Piece> blackPieces;
     int[] enPassantSquare;
@@ -29,7 +31,9 @@ class Board{
    
     Board() throws IOException{
         this.boardColors = new int[8][8];
-        this.boardPieces = new int[8][8];
+        this.boardPiecesInt = new int[8][8];
+        ArrayList<Piece> dummy_row = new ArrayList<Piece>(Collections.nCopies(8, null));
+        this.boardPiecesObject = new ArrayList<ArrayList<Piece>>(Collections.nCopies(8, dummy_row));
         this.whitePieces = new ArrayList<Piece>();
         this.blackPieces = new ArrayList<Piece>();
         this.enPassantSquare = new int[2];
@@ -44,7 +48,7 @@ class Board{
     void initPiecesByType(int[] rows, int[] cols, int pieceType) throws IOException{
         /*
          * add given piece to this.whitePieces and this.blackPieces at proper indices
-         * when creating a piece, make sure to adjust this.boardColors and this.boardPieces as well
+         * when creating a piece, make sure to adjust this.boardColors and this.boardPiecesInt as well
          * 
          * rows, cols: each are lists of the indices to use for the pieces.  
          * pieceType: from Constants.java
@@ -66,7 +70,7 @@ class Board{
                         break;
                     
                     case Constants.ROOK:
-                        piece = new Rook(row == 7, square);
+                        piece = new Rook(row == 7, square, col == 7);
                         break;
 
                     case Constants.QUEEN:
@@ -86,7 +90,8 @@ class Board{
                     this.blackPieces.add(piece);
                 }
                 this.boardColors[row][col] = (row == 6 || row == 7) ? Constants.WHITE : Constants.BLACK;
-                this.boardPieces[row][col] = pieceType;
+                this.boardPiecesInt[row][col] = pieceType;
+                this.boardPiecesObject.get(row).set(col, piece);
             }
         }
     }
@@ -94,7 +99,7 @@ class Board{
     void initBoard() throws IOException{
         /*
          * create all white and black pieces, add to this.whitePieces and this.blackPieces
-         * when creating a piece, make sure to adjust this.boardColors and this.boardPieces as well
+         * when creating a piece, make sure to adjust this.boardColors and this.boardPiecesInt as well
          */
 
         // PAWNS - 8 each
@@ -136,19 +141,117 @@ class Board{
         return null;
     }
 
-    void makeMove(Piece piece, int row, int col){
+    void makeMove(Piece piece, int row, int col) throws Exception{
         /*
          * Moves piece to (row, col)
          * Assumes move is valid. Should only be called from a move returned in possible_moves
          */
 
-         // Set board[start_square] = 'X'
-         // Set board[end_square] = piece
-         // Set enPassantSquare to square or None
-         // Set check 
-         // Set castle_rights for current color 
-         // Flip self.white_to_play 
+         /*
+            int[][] boardColors;  
+            int[][] boardPiecesInt;
+            ArrayList<Piece> whitePieces;
+            ArrayList<Piece> blackPieces;
+            int[] enPassantSquare;
+            boolean whiteToPlay = true;
+            boolean check = false;
+            boolean whiteShortCastleRights = true;
+            boolean whiteLongCastleRights = true; 
+            boolean blackShortCastleRights = true;
+            boolean blackLongCastleRights = true;
+          */
 
+        int[] start_square = piece.getSquare();
+
+        // boardColors: original square becomes empty, new square becomes color of piece 
+        this.boardColors[start_square[0]][start_square[1]] = Constants.EMPTY;
+
+        // boardPiecesInt: original square becomes empty, new square becomes int of piece
+        this.boardPiecesInt[start_square[0]][start_square[1]] = Constants.EMPTY;
+
+        // boardPiecesObject: original square becomes empty, new square becomes int of piece. store captured piece
+        Piece captured = this.boardPiecesObject.get(start_square[0]).get(start_square[1]);
+        this.boardPiecesObject.get(row).set(col, piece);
+        
+        // whitePieces/blackPiece: remove a piece if it is captured (ie if it starts on [row,col]
+        // if you captured a rook, update castle rights for opponent if neccessary
+        if (captured != null){
+            if (captured.isWhitePiece()){
+                this.whitePieces.remove(captured);
+            } else {    
+                this.blackPieces.remove(captured);
+            }
+        } 
+        
+        // enPassantSquare automatically becomes [-1, -1] if not already
+        this.enPassantSquare[0] = -1;
+        this.enPassantSquare[1] = -1;
+
+        // update castle rights if rook or king moves OR if you capture a rook (opponents castle rights lost)
+        updateCastleRights(piece, captured);
+
+        // whiteToPlay = not whiteToPlay 
+        this.whiteToPlay = !(this.whiteToPlay);
+        
+        // check if opponent is in check 
+        this.check = inCheck();
+    }
+
+    void updateCastleRights(Piece piece, Piece captured){
+        /*
+         * Update castle rights given the original piece and the captured piece
+         */
+        // check if king or rook moved
+        if (piece.getType() == Constants.KING) {
+            if (piece.isWhitePiece()){
+                this.whiteShortCastleRights = false;
+                this.whiteLongCastleRights = false;
+            } else {
+                this.blackShortCastleRights = false;
+                this.blackLongCastleRights = false;
+            }
+        } else if (piece.getType() == Constants.ROOK) {
+            Rook pieceRook = (Rook) piece;
+            if (pieceRook.isWhitePiece()){
+                if (pieceRook.kingsRook){
+                    this.whiteShortCastleRights = false;
+                } else {
+                    this.whiteLongCastleRights = false;
+                }
+            } else {
+                if (pieceRook.kingsRook){
+                    this.blackShortCastleRights = false;
+                } else {
+                    this.blackLongCastleRights = false;
+                }
+            }
+        }
+
+        // check if a rook was captured 
+        if (captured != null && captured.getType() == Constants.ROOK) {
+            Rook capturedRook = (Rook) captured;
+            if (capturedRook.isWhitePiece()){
+                if (capturedRook.kingsRook){
+                    this.whiteShortCastleRights = false;
+                } else {
+                    this.whiteLongCastleRights = false;
+                }
+            } else {
+                if (capturedRook.kingsRook){
+                    this.blackShortCastleRights = false;
+                } else {
+                    this.blackLongCastleRights = false;
+                }
+            }
+        }
+
+    }
+
+    boolean inCheck() {
+        /*
+         * Check if current turn's player is in check
+         */
+        return false;
     }
 
     double heuristic(){
@@ -182,7 +285,7 @@ class Board{
     public String toString() {
         /*
             this.boardColors = new int[8][8];
-            this.boardPieces = new int[8][8];
+            this.boardPiecesInt = new int[8][8];
             this.whitePieces = new ArrayList<Piece>();
             this.blackPieces = new ArrayList<Piece>();
             this.enPassantSquare = new int[2];
@@ -208,7 +311,7 @@ class Board{
 
         returnStr += "\n";
         // board pieces 
-        for (int[] row : this.boardPieces) {
+        for (int[] row : this.boardPiecesInt) {
             for (int pieceInt : row) {
                 String pieceStr;
                 switch (pieceInt) {
