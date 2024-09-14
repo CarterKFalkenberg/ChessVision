@@ -1,4 +1,4 @@
-package Chess_Bot;
+package Chess_Bot.src;
 
 public final class Constants {
     public static final int BLACK = -1;
