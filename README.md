@@ -9,3 +9,7 @@ Finally, a chess-bot will need to pick the best move (likely will utilize mini-m
 
 Currently will only use images of my own chess board, but may expand in the future for general use and creation of data flywheel
 
+Data labeling options:
+  - Roboflow
+  - https://github.com/HumanSignal/label-studio
+  - https://github.com/stephanecharette/DarkMark?tab=readme-ov-file 
