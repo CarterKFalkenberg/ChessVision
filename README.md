@@ -13,3 +13,6 @@ Data labeling options:
   - Roboflow
   - https://github.com/HumanSignal/label-studio
   - https://github.com/stephanecharette/DarkMark?tab=readme-ov-file 
+ Pre-trained model options:
+  - https://huggingface.co/docs/transformers/model_doc/resnet
+  - https://huggingface.co/docs/transformers/model_doc/yolos
