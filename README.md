@@ -12,7 +12,8 @@ Currently will only use images of my own chess board, but may expand in the futu
 Data labeling options:
   - Roboflow
   - https://github.com/HumanSignal/label-studio
-  - https://github.com/stephanecharette/DarkMark?tab=readme-ov-file 
+  - https://github.com/stephanecharette/DarkMark?tab=readme-ov-file
+    
  Pre-trained model options:
   - https://huggingface.co/docs/transformers/model_doc/resnet
   - https://huggingface.co/docs/transformers/model_doc/yolos
