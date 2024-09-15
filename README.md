@@ -10,10 +10,10 @@ Finally, a chess-bot will need to pick the best move (likely will utilize mini-m
 Currently will only use images of my own chess board, but may expand in the future for general use and creation of data flywheel
 
 Data labeling options:
-  - Roboflow
-  - https://github.com/HumanSignal/label-studio
-  - https://github.com/stephanecharette/DarkMark?tab=readme-ov-file
+  - Roboflow -> locally run predictions to get prelabeled data, upload labeled data and adjust labeling
+  - https://github.com/HumanSignal/label-studio -> all in one solution?
+  - https://github.com/stephanecharette/DarkMark?tab=readme-ov-file -> all in one solution?
     
  Pre-trained model options:
-  - https://huggingface.co/docs/transformers/model_doc/resnet
-  - https://huggingface.co/docs/transformers/model_doc/yolos
+  - https://huggingface.co/docs/transformers/model_doc/resnet -> ResNET
+  - https://huggingface.co/docs/transformers/model_doc/yolos -> Yolos
