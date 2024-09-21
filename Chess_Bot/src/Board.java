@@ -138,6 +138,16 @@ class Board{
          *      - if no moves and in check: checkmate
          *      - if no moves and not in check: stalemate
          */
+        ArrayList<Move> possibleMoves = new ArrayList<Move>();
+        for (ArrayList<Piece> row : this.boardPiecesObject){
+            for (Piece piece : row){
+                // If piece color is the same as color whose turn it is
+                if (piece.isWhitePiece() == this.whiteToPlay){
+                    possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.boardPiecesInt));
+                }
+            }
+        }
+
         return null;
     }
 
