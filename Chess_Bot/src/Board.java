@@ -143,12 +143,12 @@ class Board{
             for (Piece piece : row){
                 // If piece color is the same as color whose turn it is
                 if (piece.isWhitePiece() == this.whiteToPlay){
-                    possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.boardPiecesInt));
+                    possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.enPassantSquare));
                 }
             }
         }
 
-        return null;
+        return possibleMoves;
     }
 
     void makeMove(Piece piece, int row, int col) throws Exception{
