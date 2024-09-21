@@ -27,11 +27,11 @@ public class Piece {
         return this.square;
     }
 
-    public ArrayList<Move> getPossibleMoves(int[][] boardColors, int[][] boardPieces){
+    public ArrayList<Move> getPossibleMoves(int[][] boardColors, int[] enPassantSquare){
         return null;
     }
 
-    public ArrayList<Move> getStraightPathMoves(int[][] boardColors, int[][] boardPieces){
+    public ArrayList<Move> getStraightPathMoves(int[][] boardColors){
         // starting from our square, check in all 4 directions, repeat until all of them hit either a piece or end of board
         boolean checkForwards = this.square[0] < 7;
         int forwardRow = this.square[0] + 1;
@@ -98,7 +98,7 @@ public class Piece {
         return straightPathMoves;
     }
 
-    public ArrayList<Move> getDiagonalMoves(int[][] boardColors, int[][] boardPieces){
+    public ArrayList<Move> getDiagonalMoves(int[][] boardColors){
         // starting from our square, check in all 4 directions, repeat until all of them hit either a piece or end of board
         boolean checkFrontRight = this.square[0] < 7 && this.square[1] < 7;
         int[] frontRightSquare = {this.square[0] + 1, this.square[1] + 1};
