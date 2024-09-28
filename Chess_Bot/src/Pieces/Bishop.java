@@ -1,6 +1,9 @@
 package Chess_Bot.src.Pieces;
 
+import java.util.ArrayList;
+
 import Chess_Bot.src.Constants;
+import Chess_Bot.src.Move;
 
 public class Bishop extends Piece{
 
@@ -13,5 +16,10 @@ public class Bishop extends Piece{
     @Override
     public int getType() {
        return Constants.BISHOP;
+    }
+
+    @Override
+    public ArrayList<Move> getPossibleMoves(int[][] boardColors, int[] enPassantSquare){
+        return getDiagonalMoves(boardColors);
     }
 }
