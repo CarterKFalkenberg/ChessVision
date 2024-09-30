@@ -142,6 +142,7 @@ class Board{
         for (ArrayList<Piece> row : this.boardPiecesObject){
             for (Piece piece : row){
                 // If piece color is the same as color whose turn it is
+                // TODO: only add possible moves of a piece if it is not pinned!
                 if (piece.isWhitePiece() == this.whiteToPlay){
                     possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.enPassantSquare));
                 }
@@ -181,7 +182,9 @@ class Board{
 
         // boardPiecesObject: original square becomes empty, new square becomes int of piece. store captured piece
         Piece captured = this.boardPiecesObject.get(start_square[0]).get(start_square[1]);
+        // TODO: pawn promotion
         this.boardPiecesObject.get(row).set(col, piece);
+        
         
         // whitePieces/blackPiece: remove a piece if it is captured (ie if it starts on [row,col]
         // if you captured a rook, update castle rights for opponent if neccessary
@@ -194,6 +197,7 @@ class Board{
         } 
         
         // enPassantSquare automatically becomes [-1, -1] if not already
+        // TODO: enPassantSquare should not become [-1, -1] if pawn moves 2 squares forwards
         this.enPassantSquare[0] = -1;
         this.enPassantSquare[1] = -1;
 
