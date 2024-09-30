@@ -34,7 +34,7 @@ class Board{
         this.boardPiecesInt = new int[8][8];
         ArrayList<Piece> dummy_row = new ArrayList<Piece>(Collections.nCopies(8, null));
         this.boardPiecesObject = new ArrayList<ArrayList<Piece>>(Collections.nCopies(8, dummy_row));
-        this.whitePieces = new ArrayList<Piece>();
+        this.whitePieces = new ArrayList<Piece>(); 
         this.blackPieces = new ArrayList<Piece>();
         this.enPassantSquare = new int[2];
 
@@ -130,7 +130,7 @@ class Board{
         col_indices[0]++;
         initPiecesByType(row_indices, col_indices, Constants.KING);
     }
-
+    
     ArrayList<Move> getPossibleMoves(){
         /*
          *  Returns a list of all possible moves in the board's position 
@@ -142,14 +142,25 @@ class Board{
         for (ArrayList<Piece> row : this.boardPiecesObject){
             for (Piece piece : row){
                 // If piece color is the same as color whose turn it is
-                // TODO: only add possible moves of a piece if it is not pinned!
                 if (piece.isWhitePiece() == this.whiteToPlay){
                     possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.enPassantSquare));
                 }
             }
         }
 
+        // remove cases where you move a pinned piece or move into a check
+        removeIllegalMoves(possibleMoves);
+
         return possibleMoves;
+    }
+
+    void removeIllegalMoves(ArrayList<Move> moves) {
+        // a theoretically possible move is illegal iff it results in the player who made that move ending up in check
+        for (Move move : moves) {
+            if (inCheck(move)){
+                moves.remove(move);
+            }
+        }
     }
 
     void makeMove(Piece piece, int row, int col) throws Exception{
@@ -264,6 +275,13 @@ class Board{
     boolean inCheck() {
         /*
          * Check if current turn's player is in check
+         */
+        return false;
+    }
+
+    boolean inCheck(Move move) {
+        /*
+         * Check if current turn's player would be in check if they made a certain move
          */
         return false;
     }
