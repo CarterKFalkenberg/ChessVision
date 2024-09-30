@@ -9,7 +9,7 @@ public class Piece {
 
     boolean isWhite;
     int[] square;
-    int pieceColor;
+    public int pieceColor;
     public Piece(boolean isWhite, int[] square) {
         this.isWhite = isWhite;
         this.pieceColor = isWhite ? Constants.WHITE : Constants.BLACK;
