@@ -45,6 +45,8 @@ class Board{
         initBoard();
     }
 
+    // TODO: Instead of makeMove, have Board() constructor where you create a copy of a board but with a move that is to be made
+
     void initPiecesByType(int[] rows, int[] cols, int pieceType) throws IOException{
         /*
          * add given piece to this.whitePieces and this.blackPieces at proper indices
@@ -219,7 +221,8 @@ class Board{
         this.whiteToPlay = !(this.whiteToPlay);
         
         // check if opponent is in check 
-        this.check = inCheck();
+        // TODO: fix
+        //this.check = inCheck();
     }
 
     void updateCastleRights(Piece piece, Piece captured){
@@ -272,9 +275,10 @@ class Board{
 
     }
 
-    boolean inCheck() {
+    static boolean inCheck(int[][] boardPiecesInt, int[][] boardColors, int color) {
         /*
-         * Check if current turn's player is in check
+         * Check if color is in check
+         * TODO: implement
          */
         return false;
     }
@@ -283,7 +287,13 @@ class Board{
         /*
          * Check if current turn's player would be in check if they made a certain move
          */
-        return false;
+        int[][] boardPiecesIntCopy = this.boardPiecesInt;
+        int[][] boardColorsCopy = this.boardColors;
+        boardPiecesIntCopy[move.start_row][move.start_column] = Constants.EMPTY; 
+        boardColorsCopy[move.start_row][move.start_column] = Constants.EMPTY; 
+        boardPiecesIntCopy[move.end_row][move.end_column] = move.piece.getType(); 
+        boardColorsCopy[move.end_row][move.end_column] = move.piece.pieceColor; 
+        return Board.inCheck(boardPiecesIntCopy, boardColorsCopy, move.piece.pieceColor);
     }
 
     double heuristic(){
