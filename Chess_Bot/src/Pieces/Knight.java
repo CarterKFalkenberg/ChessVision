@@ -36,7 +36,7 @@ public class Knight extends Piece{
         // forward left
         row = this.square[0] + 2;
         col = this.square[1] - 1;
-        if (row < 8 && col >= 0){
+        if (row < 8 && col >= 0 && boardColors[row][col] != this.pieceColor){
             possibleMoves.add(
                 new Move(this, this.square[0], this.square[1], row, col)
             );
@@ -45,7 +45,7 @@ public class Knight extends Piece{
         // right forward 
         row = this.square[0] + 1;
         col = this.square[1] + 2;
-        if (row < 8 && col < 8){
+        if (row < 8 && col < 8 && boardColors[row][col] != this.pieceColor){
             possibleMoves.add(
                 new Move(this, this.square[0], this.square[1], row, col)
             );
@@ -54,7 +54,7 @@ public class Knight extends Piece{
         // left forward 
         row = this.square[0] + 1;
         col = this.square[1] - 2;
-        if (row < 8 && col >= 0){
+        if (row < 8 && col >= 0 && boardColors[row][col] != this.pieceColor){
             possibleMoves.add(
                 new Move(this, this.square[0], this.square[1], row, col)
             );
@@ -63,7 +63,7 @@ public class Knight extends Piece{
         // backward right
         row = this.square[0] - 2;
         col = this.square[1] + 1;
-        if (row >= 0 && col < 8){
+        if (row >= 0 && col < 8 && boardColors[row][col] != this.pieceColor){
             possibleMoves.add(
                 new Move(this, this.square[0], this.square[1], row, col)
             );
@@ -72,7 +72,7 @@ public class Knight extends Piece{
         // backward left 
         row = this.square[0] - 2;
         col = this.square[1] - 1;
-        if (row >= 0 && col >= 0){
+        if (row >= 0 && col >= 0 && boardColors[row][col] != this.pieceColor){
             possibleMoves.add(
                 new Move(this, this.square[0], this.square[1], row, col)
             );
@@ -81,7 +81,7 @@ public class Knight extends Piece{
         // right backward
         row = this.square[0] - 1;
         col = this.square[1] + 2;
-        if (row >= 0 && col < 8){
+        if (row >= 0 && col < 8 && boardColors[row][col] != this.pieceColor){
             possibleMoves.add(
                 new Move(this, this.square[0], this.square[1], row, col)
             );
@@ -90,7 +90,7 @@ public class Knight extends Piece{
         // left backward
         row = this.square[0] - 1;
         col = this.square[1] - 2;
-        if (row >= 0 && col >= 0){
+        if (row >= 0 && col >= 0 && boardColors[row][col] != this.pieceColor){
             possibleMoves.add(
                 new Move(this, this.square[0], this.square[1], row, col)
             );
