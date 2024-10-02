@@ -275,14 +275,6 @@ class Board{
 
     }
 
-    static boolean inCheck(int[][] boardPiecesInt, int[][] boardColors, int color) {
-        /*
-         * Check if color is in check
-         * TODO: implement
-         */
-        return false;
-    }
-
     boolean inCheck(Move move) {
         /*
          * Check if current turn's player would be in check if they made a certain move
@@ -294,6 +286,261 @@ class Board{
         boardPiecesIntCopy[move.end_row][move.end_column] = move.piece.getType(); 
         boardColorsCopy[move.end_row][move.end_column] = move.piece.pieceColor; 
         return Board.inCheck(boardPiecesIntCopy, boardColorsCopy, move.piece.pieceColor);
+    }
+
+    static boolean inCheck(int[][] boardPiecesInt, int[][] boardColors, int color) {
+        /*
+         * Check if color is in check
+         */
+        
+        // find the king's square (of the given color)
+        int kingRow = -1;
+        int kingCol = -1;
+        A:for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (boardPiecesInt[row][col] == Constants.KING && boardColors[row][col] == color){
+                    kingRow = row;
+                    kingCol = col;
+                    break A;
+                }
+            }
+        }
+
+        // THE ONLY WAYS YOU CAN BE IN CHECK ARE FROM A KNIGHT, A STRAIGHT PATH PIECE, OR A DIAGONAL PATH PIECE
+
+        // check if in check by a knight
+        if (inCheckByKnight(boardPiecesInt, boardColors, color, kingRow, kingCol)){
+            return true;
+        }
+
+        // check if in check by a straight path piece (Queen/Rook)
+        if (inCheckFromStraightPath(boardPiecesInt, boardColors, color, kingRow, kingCol)){
+            return true;
+        }
+
+        // check if in check by a diagonal path piece (Queen/Bishop/Pawn)
+        if (inCheckFromDiagonalPath(boardPiecesInt, boardColors, color, kingRow, kingCol)){
+            return true;
+        }
+
+        // if not in check from knight, straight path, or diagonal path piece, then you are not in check
+        return false;
+    }
+
+    static boolean inCheckByKnight(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
+        // color: The color of the KING potentially in check
+        int row, col;
+    
+        // forward right
+        row = kingRow + 2;
+        col = kingCol + 1;
+        if (row < 8 && col < 8 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        }
+
+        // forward left
+        row = kingRow + 2;
+        col = kingCol - 1;
+        if (row < 8 && col >= 0 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        }
+
+        // right forward 
+        row = kingRow + 1;
+        col = kingCol + 2;
+        if (row < 8 && col < 8 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        }
+
+        // left forward 
+        row = kingRow + 1;
+        col = kingCol - 2;
+        if (row < 8 && col >= 0 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        }
+
+        // backward right
+        row = kingRow - 2;
+        col = kingCol + 1;
+        if (row >= 0 && col < 8 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        }
+
+        // backward left 
+        row = kingRow - 2;
+        col = kingCol - 1;
+        if (row >= 0 && col >= 0 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        }
+
+        // right backward
+        row = kingRow - 1;
+        col = kingCol + 2;
+        if (row >= 0 && col < 8 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        } 
+
+        // left backward
+        row = kingRow - 1;
+        col = kingCol - 2;
+        if (row >= 0 && col >= 0 && boardPiecesInt[row][col] == Constants.KNIGHT && boardColors[row][col] != color){
+            return true;
+        }  
+        return false;
+    }
+
+    static boolean inCheckFromStraightPath(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
+
+        // forwards
+        int row = kingRow + 1; 
+        A: while (row < 8) {
+            if (boardColors[row][kingCol] == color){
+                break A;
+            } else if (boardColors[row][kingCol] != Constants.EMPTY){
+                if (boardPiecesInt[row][kingCol] == Constants.QUEEN || boardPiecesInt[row][kingCol] == Constants.ROOK){
+                    return true;
+                }
+                return false;
+            } 
+            row += 1;
+        }
+
+        // backwards
+        row = kingRow - 1; 
+        A: while (row >= 0) {
+            if (boardColors[row][kingCol] == color){
+                break A;
+            } else if (boardColors[row][kingCol] != Constants.EMPTY){
+                if (boardPiecesInt[row][kingCol] == Constants.QUEEN || boardPiecesInt[row][kingCol] == Constants.ROOK){
+                    return true;
+                }
+                return false;
+            } 
+            row -= 1;
+        }
+
+        // right
+        int col = kingCol + 1; 
+        A: while (col < 8) {
+            if (boardColors[kingRow][col] == color){
+                break A;
+            } else if (boardColors[kingRow][col] != Constants.EMPTY){
+                if (boardPiecesInt[kingRow][col] == Constants.QUEEN || boardPiecesInt[kingRow][col] == Constants.ROOK){
+                    return true;
+                }
+                return false;
+            } 
+            col += 1;
+        }
+
+        // left
+        col = kingCol - 1; 
+        A: while (col >= 0) {
+            if (boardColors[kingRow][col] == color){
+                break A;
+            } else if (boardColors[kingRow][col] != Constants.EMPTY){
+                if (boardPiecesInt[kingRow][col] == Constants.QUEEN || boardPiecesInt[kingRow][col] == Constants.ROOK){
+                    return true;
+                }
+                return false;
+            } 
+            col -= 1;
+        }
+
+        return false;
+    }
+
+    static boolean inCheckFromDiagonalPath(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
+        
+        // forwards right
+        int row = kingRow + 1; 
+        int col = kingCol + 1;
+        boolean firstDiag = true;
+        A: while (row < 8 && col < 8) {
+            if (boardColors[row][col] == color){
+                break A;
+            } else if (boardColors[row][col] != Constants.EMPTY){
+                if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
+                    return true;
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                    // only case with a valid pawn check here is if the king is black (b/c we are checking towards white's direction)
+                        // i.e. if we are a white king, we are behind the black pawn so we are not in check. Rare but possible in endgames
+                    return color == Constants.BLACK;
+                }
+                break A;
+            } 
+            row += 1;
+            col += 1;
+            firstDiag = false;
+        }
+
+        // forwards left
+        row = kingRow + 1; 
+        col = kingCol - 1;
+        firstDiag = true;
+        A: while (row < 8 && col >= 0) {
+            if (boardColors[row][col] == color){
+                break A;
+            } else if (boardColors[row][col] != Constants.EMPTY){
+                if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
+                    return true;
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                    // only case with a valid pawn check here is if the king is black (b/c we are checking towards white's direction)
+                        // i.e. if we are a white king, we are behind the black pawn so we are not in check. Rare but possible in endgames
+                    return color == Constants.BLACK;
+                }
+                break A;
+            } 
+            row += 1;
+            col -= 1;
+            firstDiag = false;
+        }
+
+        // backwards right
+        row = kingRow - 1; 
+        col = kingCol + 1;
+        firstDiag = true;
+        A: while (row >= 0 && col < 8) {
+            if (boardColors[row][col] == color){
+                break A;
+            } else if (boardColors[row][col] != Constants.EMPTY){
+                if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
+                    return true;
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                    // only case with a valid pawn check here is if the king is white (b/c we are checking towards black's direction)
+                        // i.e. if we are a black king, we are behind the black pawn so we are not in check. Rare but possible in endgames
+                    return color == Constants.WHITE;
+                }
+                break A;
+            } 
+            row -= 1;
+            col += 1;
+            firstDiag = false;
+        }
+
+        // backwards left
+        row = kingRow - 1; 
+        col = kingCol - 1;
+        firstDiag = true;
+        A: while (row >= 0 && col >= 0) {
+            if (boardColors[row][col] == color){
+                break A;
+            } else if (boardColors[row][col] != Constants.EMPTY){
+                if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
+                    return true;
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                    // only case with a valid pawn check here is if the king is white (b/c we are checking towards black's direction)
+                        // i.e. if we are a black king, we are behind the black pawn so we are not in check. Rare but possible in endgames
+                    return color == Constants.WHITE;
+                }
+                break A;
+            } 
+            row -= 1;
+            col -= 1;
+            firstDiag = false;
+        }
+        
+        return false;
     }
 
     double heuristic(){
