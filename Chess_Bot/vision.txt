@@ -61,6 +61,8 @@ How to check if pinned to king:
             - If you make it here, return False, you are not pinned. 
 
 How to check if a move puts you in check:
+    Even easier: if the result of a move is that you are in check 
+    Simply make the move and check if you are in check
     1. If you are moving the king to a square 
         - Check all 8 directions from that square for relevant pieces 
         - Check all 4 directions from that square for knights 
