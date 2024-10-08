@@ -23,11 +23,13 @@ public class Pawn extends Piece{
 
     @Override
     public ArrayList<Move> getPossibleMoves(int[][] boardColors, int[] enPassantSquare){
-        // ASSUMES PAWN IS NOT PROMOTED. IN THAT CASE, IT SHOULD BECOME A QUEEN
+        // ASSUMES PAWN IS NOT PROMOTED. IN THAT CASE, IT SHOULD HAVE BECAME A QUEEN
         ArrayList<Move> moves = new ArrayList<Move>();
         int opponentColor = -1 * this.pieceColor;
         int newRow;
         int newCol;
+
+        // check en passant
         if (this.square[0] == enPassantSquare[0] && Math.abs(this.square[1] - enPassantSquare[1]) == 1){
             newRow = enPassantSquare[0];
             newRow += opponentColor;    // white moves -1, black moves +1
