@@ -20,9 +20,9 @@ class Board{
     ArrayList<ArrayList<Piece>> boardPiecesObject;
     ArrayList<Piece> whitePieces;
     ArrayList<Piece> blackPieces;
-    int[] enPassantSquare;
+    int[] enPassantSquare;  // the square that the opposing color's pawn just advanced 2 pieces to, else [-1, -1]
     int turnColor = Constants.WHITE;
-    boolean check = false;
+    boolean check = false;  // whether the turnColor player is in check (if white's turn, true iff white is in check)
     boolean whiteShortCastleRights = true;
     boolean whiteLongCastleRights = true; 
     boolean blackShortCastleRights = true;
@@ -165,50 +165,59 @@ class Board{
         }
     }
 
-    void makeMove(Piece piece, int row, int col) throws Exception{
-        /*
-         * Moves piece to (row, col)
-         * Assumes move is valid. Should only be called from a move returned in possible_moves
-         */
-        int[] start_square = piece.getSquare();
+    void makeMove(Move move) {
 
-        // boardColors: original square becomes empty, new square becomes color of piece 
-        this.boardColors[start_square[0]][start_square[1]] = Constants.EMPTY;
-        this.boardColors[row][col] = piece.pieceColor;
+        // start square becomes empty
+        this.boardColors[move.start_row][move.start_column] = Constants.EMPTY; 
+        this.boardPiecesInt[move.start_row][move.start_column] = Constants.EMPTY;
+        this.boardPiecesObject.get(move.start_row).set(move.start_column, null);
 
-        // boardPiecesInt: original square becomes empty, new square becomes int of piece
-        this.boardPiecesInt[start_square[0]][start_square[1]] = Constants.EMPTY;
-        this.boardPiecesInt[row][col] = piece.getType();
-
-        // boardPiecesObject: original square becomes empty, new square becomes int of piece. store captured piece
-        Piece captured = this.boardPiecesObject.get(row).get(col);
-        this.boardPiecesObject.get(row).set(col, piece);
-        
-        
-        // whitePieces/blackPiece: remove a piece if it is captured (ie if it starts on [row,col]
-        // if you captured a rook, update castle rights for opponent if neccessary
-        if (captured != null){
-            if (captured.isWhitePiece()){
+        // if piece on end square, it is removed. 
+        Piece captured = this.boardPiecesObject.get(move.end_row).get(move.end_column);
+        switch (this.boardColors[move.end_row][move.end_column]) {
+            case Constants.WHITE:
                 this.whitePieces.remove(captured);
-            } else {    
+                break;
+            case Constants.BLACK:
                 this.blackPieces.remove(captured);
+                break;
+            default:
+                break;
+        }
+
+        
+        // end square becomes filled with move.piece
+        this.boardColors[move.end_row][move.end_column] = move.piece.pieceColor; 
+
+        // if promotion, piece becomes a queen
+        // otherwise, simply move the move.piece to the new position
+        if (move.promotion){
+            Piece promoted = new Piece(move.piece.isWhitePiece(), new int[]{move.end_row, move.end_column});
+            if (promoted.isWhitePiece()){
+                this.whitePieces.remove(move.piece);
+                this.whitePieces.add(promoted);
+            } else {
+                this.blackPieces.remove(move.piece);
+                this.blackPieces.add(promoted);
             }
-        } 
-        
-        // enPassantSquare automatically becomes [-1, -1] if not already
-        // TODO: enPassantSquare should not become [-1, -1] if pawn moves 2 squares forwards
-        this.enPassantSquare[0] = -1;
-        this.enPassantSquare[1] = -1;
+            this.boardPiecesInt[move.end_row][move.end_column] = promoted.getType();
+            this.boardPiecesObject.get(move.end_row).set(move.end_column, promoted);
+            // castle rights are not affected via promotion
+        } else {
+            this.boardPiecesInt[move.end_row][move.end_column] = move.piece.getType();
+            this.boardPiecesObject.get(move.end_row).set(move.end_column, move.piece);
+            updateCastleRights(move.piece, captured);
+        }
 
-        // update castle rights if rook or king moves OR if you capture a rook (opponents castle rights lost)
-        updateCastleRights(piece, captured);
+        // set en passant square (default [-1, -1], unless pawn just moved 2 squares)
+        this.enPassantSquare = move.enPassantSquare;
 
-        // flip turn color
-        this.turnColor *= -1;   // B = -1, W = 1
-        
-        // check if opponent is in check 
-        // TODO: fix
-        //this.check = inCheck();
+        // Flip turn color
+        this.turnColor *= -1; // Black = -1, White = 1
+
+        // update check status
+        this.check = inCheck();
+
     }
 
     void updateCastleRights(Piece piece, Piece captured){
@@ -259,6 +268,10 @@ class Board{
             }
         }
 
+    }
+
+    boolean inCheck() {
+        return Board.inCheck(this.boardPiecesInt, this.boardColors, this.turnColor);
     }
 
     boolean inCheck(Move move) {
