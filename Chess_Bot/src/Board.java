@@ -21,7 +21,7 @@ class Board{
     ArrayList<Piece> whitePieces;
     ArrayList<Piece> blackPieces;
     int[] enPassantSquare;
-    boolean whiteToPlay = true;
+    int turnColor = Constants.WHITE;
     boolean check = false;
     boolean whiteShortCastleRights = true;
     boolean whiteLongCastleRights = true; 
@@ -144,7 +144,7 @@ class Board{
         for (ArrayList<Piece> row : this.boardPiecesObject){
             for (Piece piece : row){
                 // If piece color is the same as color whose turn it is
-                if (piece.isWhitePiece() == this.whiteToPlay){
+                if (piece.pieceColor == this.turnColor){
                     possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.enPassantSquare));
                 }
             }
@@ -170,32 +170,18 @@ class Board{
          * Moves piece to (row, col)
          * Assumes move is valid. Should only be called from a move returned in possible_moves
          */
-
-         /*
-            int[][] boardColors;  
-            int[][] boardPiecesInt;
-            ArrayList<Piece> whitePieces;
-            ArrayList<Piece> blackPieces;
-            int[] enPassantSquare;
-            boolean whiteToPlay = true;
-            boolean check = false;
-            boolean whiteShortCastleRights = true;
-            boolean whiteLongCastleRights = true; 
-            boolean blackShortCastleRights = true;
-            boolean blackLongCastleRights = true;
-          */
-
         int[] start_square = piece.getSquare();
 
         // boardColors: original square becomes empty, new square becomes color of piece 
         this.boardColors[start_square[0]][start_square[1]] = Constants.EMPTY;
+        this.boardColors[row][col] = piece.pieceColor;
 
         // boardPiecesInt: original square becomes empty, new square becomes int of piece
         this.boardPiecesInt[start_square[0]][start_square[1]] = Constants.EMPTY;
+        this.boardPiecesInt[row][col] = piece.getType();
 
         // boardPiecesObject: original square becomes empty, new square becomes int of piece. store captured piece
-        Piece captured = this.boardPiecesObject.get(start_square[0]).get(start_square[1]);
-        // TODO: pawn promotion
+        Piece captured = this.boardPiecesObject.get(row).get(col);
         this.boardPiecesObject.get(row).set(col, piece);
         
         
@@ -217,8 +203,8 @@ class Board{
         // update castle rights if rook or king moves OR if you capture a rook (opponents castle rights lost)
         updateCastleRights(piece, captured);
 
-        // whiteToPlay = not whiteToPlay 
-        this.whiteToPlay = !(this.whiteToPlay);
+        // flip turn color
+        this.turnColor *= -1;   // B = -1, W = 1
         
         // check if opponent is in check 
         // TODO: fix
@@ -543,6 +529,7 @@ class Board{
         return false;
     }
 
+    // TODO: Implement
     double heuristic(){
         /*
          * Returns the evaluation for the board's current position
