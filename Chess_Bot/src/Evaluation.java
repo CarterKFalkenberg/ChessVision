@@ -2,11 +2,11 @@ package Chess_Bot.src;
 
 import java.util.ArrayList;
 
-import Chess_Bot.src.Pieces.King;
 import Chess_Bot.src.Pieces.Piece;
 
 public class Evaluation {
-
+    final static double SPACE_DIFFERENCE_WEIGHT = 0.2;
+    final static double KING_SAFETY_WEIGHT = 0.1;
     final static int PAWN_SHIELD_WEIGHT = 2;
     final static int ENEMY_DISTANCE_WEIGHT = 1;
     final static int CENTER_DISTANCE_WEIGHT = 1;
@@ -18,11 +18,16 @@ public class Evaluation {
          * Zero-sum, i.e. eval(black) = -1 * eval(white)
          */
 
-        int pieceDifferential = pieceDifferential(board.whitePieces, board.blackPieces);
+        double evaluation = pieceDifferential(board.whitePieces, board.blackPieces);
+        
         double kingSafetyDifferential = kingSafetyDifferential(board);
-        int spaceDifferential = spaceDifferential(board.boardColors, board.boardPiecesInt);
+        evaluation += (KING_SAFETY_WEIGHT / (PAWN_SHIELD_WEIGHT + ENEMY_DISTANCE_WEIGHT + CENTER_DISTANCE_WEIGHT)) * kingSafetyDifferential;
 
-        return 0.0;
+        int spaceDifferential = spaceDifferential(board.boardColors, board.boardPiecesInt);
+        evaluation += SPACE_DIFFERENCE_WEIGHT * spaceDifferential;
+
+        evaluation += bishopPairDifferential(board.whitePieces, board.blackPieces);
+        return evaluation;
     }
 
     public static int pieceDifferential(ArrayList<Piece> whitePieces, ArrayList<Piece> blackPieces){
@@ -429,6 +434,45 @@ public class Evaluation {
         }
 
         return knightSpace;
+    }
+
+    public static double bishopPairDifferential(ArrayList<Piece> whitePieces, ArrayList<Piece> blackPieces){
+        int whiteBishops = 0;
+        int blackBishops = 0;
+
+        for (Piece piece : whitePieces) {
+            if (piece.getType() == Constants.BISHOP) {
+                whiteBishops++;
+            }
+            if (whiteBishops == 2){
+                break;
+            }
+        }
+        for (Piece piece : blackPieces) {
+            if (piece.getType() == Constants.BISHOP) {
+                blackBishops++;
+            }
+            if (blackBishops == 2){
+                break;
+            }
+        }
+
+        if (whiteBishops == 2){
+            if (blackBishops == 2){
+                return 0;
+            } 
+            if (blackBishops == 1){
+                return 0.15;
+            }
+            return 0.3;
+        }
+        if (blackBishops == 2){
+            if (whiteBishops == 1){
+                return -0.15;
+            }
+            return -.3;
+        }
+        return 0.0;
     }
 
     public static int distance(Piece piece1, Piece piece2){
