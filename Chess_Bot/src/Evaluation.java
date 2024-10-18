@@ -24,8 +24,7 @@ public class Evaluation {
         evaluation += (KING_SAFETY_WEIGHT / (PAWN_SHIELD_WEIGHT + ENEMY_DISTANCE_WEIGHT + CENTER_DISTANCE_WEIGHT)) * kingSafetyDifferential;
 
         int spaceDifferential = spaceDifferential(board.boardColors, board.boardPiecesInt);
-        evaluation += SPACE_DIFFERENCE_WEIGHT * spaceDifferential;
-
+        evaluation += SPACE_DIFFERENCE_WEIGHT * spaceDifferential;t=
         evaluation += bishopPairDifferential(board.whitePieces, board.blackPieces);
         return evaluation;
     }
