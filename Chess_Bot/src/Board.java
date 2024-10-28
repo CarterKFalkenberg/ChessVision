@@ -32,8 +32,13 @@ class Board{
     Board() throws IOException{
         this.boardColors = new int[8][8];
         this.boardPiecesInt = new int[8][8];
-        ArrayList<Piece> dummy_row = new ArrayList<Piece>(Collections.nCopies(8, null));
-        this.boardPiecesObject = new ArrayList<ArrayList<Piece>>(Collections.nCopies(8, dummy_row));
+        
+        this.boardPiecesObject = new ArrayList<ArrayList<Piece>>();
+        for (int i = 0; i < 8; i++){
+            ArrayList<Piece> dummy_row = new ArrayList<Piece>(Collections.nCopies(8, null));
+            boardPiecesObject.add(dummy_row);
+        }
+
         this.whitePieces = new ArrayList<Piece>(); 
         this.blackPieces = new ArrayList<Piece>();
         this.enPassantSquare = new int[2];
@@ -141,6 +146,10 @@ class Board{
         ArrayList<Move> possibleMoves = new ArrayList<Move>();
         for (ArrayList<Piece> row : this.boardPiecesObject){
             for (Piece piece : row){
+                if (piece == null){
+                    continue;
+                }
+
                 // If piece color is the same as color whose turn it is
                 if (piece.pieceColor == this.turnColor){
                     possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.enPassantSquare));
