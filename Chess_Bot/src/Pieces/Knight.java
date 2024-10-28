@@ -7,8 +7,6 @@ import Chess_Bot.src.Move;
 
 public class Knight extends Piece{
 
-    boolean isWhite;
-    int[] square;
     public Knight(boolean isWhite, int[] square) {
         super(isWhite, square);
     }

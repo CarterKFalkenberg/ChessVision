@@ -10,8 +10,6 @@ import java.lang.Math;
 
 public class Pawn extends Piece{
 
-    boolean isWhite;
-    int[] square;
     public Pawn(boolean isWhite, int[] square) {
         super(isWhite, square);
     }
@@ -59,7 +57,7 @@ public class Pawn extends Piece{
         // check right diagonal (not en passant)
         newRow = this.square[0] + opponentColor;   // white moves -1, black moves +1
         newCol = this.square[1] + 1;
-        if (boardColors[newRow][newCol] == opponentColor){
+        if (newCol < 8 && boardColors[newRow][newCol] == opponentColor){
             moves.add(
                 new Move(this, this.square[0], this.square[1], newRow, newCol)
         );
@@ -67,7 +65,7 @@ public class Pawn extends Piece{
 
         // check left diagonal (not en passant)
         newCol = this.square[1] - 1;
-        if (boardColors[newRow][newCol] == opponentColor){
+        if (newCol >= 0 && boardColors[newRow][newCol] == opponentColor){
             moves.add(
                 new Move(this, this.square[0], this.square[1], newRow, newCol)
         );
