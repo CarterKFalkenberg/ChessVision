@@ -25,4 +25,25 @@ public class Move {
             this.enPassantSquare = new int[]{-1, -1};
         }
     }
+
+    @Override
+    public String toString() {
+        // e.g. "WPawn on B3 to B4"
+        
+        String str = "";
+        if (piece.pieceColor == 1){
+            str += "W";
+        } else {
+            str += "B";
+        }
+        str += Constants.pieceIntToStr.get(this.piece.getType());
+        str += " on ";
+        str += Constants.columnIntToChar.get(this.start_column);
+        str += 8 - this.start_row;
+        str += " to ";
+        str += Constants.columnIntToChar.get(this.end_column);
+        str += 8 - this.end_row;
+        
+        return str;
+    }
 }
