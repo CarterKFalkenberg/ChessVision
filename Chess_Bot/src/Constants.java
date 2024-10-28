@@ -14,6 +14,9 @@ public final class Constants {
     public static final int KING = 6;
 
     public static HashMap<Integer, Integer> pieceToValue = initPieceToValue();
+    public static HashMap<Integer, String> pieceIntToStr = initPieceIntToStr();
+    public static HashMap<Integer, Character> columnIntToChar = initColumnIntToChar();
+
 
     private Constants() {
     // Prevent instantiation
@@ -29,6 +32,32 @@ public final class Constants {
         pieceToValue.put(KING, 0);
         
         return pieceToValue;
+    }
+
+    private static HashMap<Integer, String> initPieceIntToStr(){
+        HashMap<Integer, String> pieceIntToStr = new HashMap<Integer, String>();
+        pieceIntToStr.put(1, "Pawn");
+        pieceIntToStr.put(2, "Knight");
+        pieceIntToStr.put(3, "Bishop");
+        pieceIntToStr.put(4, "Rook");
+        pieceIntToStr.put(5, "Queen");
+        pieceIntToStr.put(6, "King");
+        
+        return pieceIntToStr;
+    }
+
+    private static HashMap<Integer, Character> initColumnIntToChar(){
+        HashMap<Integer, Character> columnIntToChar = new HashMap<Integer, Character>();
+        columnIntToChar.put(0, 'A');
+        columnIntToChar.put(1, 'B');
+        columnIntToChar.put(2, 'C');
+        columnIntToChar.put(3, 'D');
+        columnIntToChar.put(4, 'E');
+        columnIntToChar.put(5, 'F');
+        columnIntToChar.put(6, 'G');
+        columnIntToChar.put(7, 'H');
+        
+        return columnIntToChar;
     }
 
  }
