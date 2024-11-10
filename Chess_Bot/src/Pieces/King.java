@@ -20,6 +20,10 @@ public class King extends Piece{
         // DOES NOT TAKE INTO ACCOUNT CHECKS OR ILLEGAL MOVING INTO A CHECK! DO THAT DURING GAME LOGIC
         ArrayList<Move> moves = new ArrayList<Move>();
 
+        // TODO: castle short
+
+        // TODO: castle long
+
         // forward
         if (this.square[0] < 7 && boardColors[this.square[0]+1][this.square[1]] != this.pieceColor) {
             moves.add(
