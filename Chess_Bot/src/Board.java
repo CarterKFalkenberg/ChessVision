@@ -146,14 +146,12 @@ class Board{
         ArrayList<Move> possibleMoves = new ArrayList<Move>();
         for (ArrayList<Piece> row : this.boardPiecesObject){
             for (Piece piece : row){
-                if (piece == null){
+                if (piece == null || piece.pieceColor != this.turnColor){
                     continue;
                 }
 
                 // If piece color is the same as color whose turn it is
-                if (piece.pieceColor == this.turnColor){
-                    possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.enPassantSquare));
-                }
+                possibleMoves.addAll(piece.getPossibleMoves(this.boardColors, this.enPassantSquare));
             }
         }
 
@@ -165,7 +163,15 @@ class Board{
 
     void removeIllegalMoves(ArrayList<Move> moves) {
         // a theoretically possible move is illegal iff it results in the player who made that move ending up in check
+            // EXCEPT for castling, need to check that! 
         for (Move move : moves) {
+            
+            // TODO: if the move is castling, remove if you do not have castling rights or if you are in check
+
+            // TODO: if you do have castling rights, additionally check if the king would be in check by
+                // moving 1 square in the castling direction (i.e. create a new move and check that)
+            
+            
             if (inCheck(move)){
                 moves.remove(move);
             }
@@ -199,7 +205,8 @@ class Board{
         // if promotion, piece becomes a queen
         // otherwise, simply move the move.piece to the new position
         if (move.promotion){
-            Piece promoted = new Piece(move.piece.isWhitePiece(), new int[]{move.end_row, move.end_column});
+            // TODO: add knight promotion if you want 
+            Queen promoted = new Queen(move.piece.isWhitePiece(), new int[]{move.end_row, move.end_column});
             if (promoted.isWhitePiece()){
                 this.whitePieces.remove(move.piece);
                 this.whitePieces.add(promoted);
@@ -285,6 +292,7 @@ class Board{
         /*
          * Check if current turn's player would be in check if they made a certain move
          */
+        // TODO: Does not currently support castling or en pessant or promotion
         int[][] boardPiecesIntCopy = this.boardPiecesInt;
         int[][] boardColorsCopy = this.boardColors;
         boardPiecesIntCopy[move.start_row][move.start_column] = Constants.EMPTY; 
@@ -297,7 +305,7 @@ class Board{
     static boolean inCheck(int[][] boardPiecesInt, int[][] boardColors, int color) {
         /*
          * Check if color is in check
-         */
+        */
         
         // find the king's square (of the given color)
         int kingRow = -1;
@@ -468,10 +476,10 @@ class Board{
             } else if (boardColors[row][col] != Constants.EMPTY){
                 if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
                     return true;
-                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN && color == Constants.BLACK){
                     // only case with a valid pawn check here is if the king is black (b/c we are checking towards white's direction)
                         // i.e. if we are a white king, we are behind the black pawn so we are not in check. Rare but possible in endgames
-                    return color == Constants.BLACK;
+                    return true;
                 }
                 break A;
             } 
@@ -490,10 +498,10 @@ class Board{
             } else if (boardColors[row][col] != Constants.EMPTY){
                 if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
                     return true;
-                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN && color == Constants.BLACK){
                     // only case with a valid pawn check here is if the king is black (b/c we are checking towards white's direction)
                         // i.e. if we are a white king, we are behind the black pawn so we are not in check. Rare but possible in endgames
-                    return color == Constants.BLACK;
+                    return true;
                 }
                 break A;
             } 
@@ -512,10 +520,10 @@ class Board{
             } else if (boardColors[row][col] != Constants.EMPTY){
                 if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
                     return true;
-                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN && color == Constants.WHITE){
                     // only case with a valid pawn check here is if the king is white (b/c we are checking towards black's direction)
                         // i.e. if we are a black king, we are behind the black pawn so we are not in check. Rare but possible in endgames
-                    return color == Constants.WHITE;
+                    return true;
                 }
                 break A;
             } 
@@ -534,10 +542,10 @@ class Board{
             } else if (boardColors[row][col] != Constants.EMPTY){
                 if (boardPiecesInt[row][col] == Constants.QUEEN || boardPiecesInt[row][col] == Constants.BISHOP){
                     return true;
-                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN){
+                } else if (firstDiag && boardPiecesInt[row][col] == Constants.PAWN && color == Constants.WHITE){
                     // only case with a valid pawn check here is if the king is white (b/c we are checking towards black's direction)
                         // i.e. if we are a black king, we are behind the black pawn so we are not in check. Rare but possible in endgames
-                    return color == Constants.WHITE;
+                    return true;
                 }
                 break A;
             } 
@@ -559,8 +567,45 @@ class Board{
             this.enPassantSquare = new int[2];
          */
         
-        String returnStr = "";
+        String returnStr = "-| A B C D E F G H\n";
+        returnStr += "------------------\n";
 
+        // uppercase: white, lowercase: black
+        for (int i = 0; i < 8; i++) {
+            returnStr += (8-i) + "| ";
+            for (int j = 0; j < 8; j++){
+                int pieceInt = this.boardPiecesInt[i][j];
+                String pieceStr = "";
+                switch (pieceInt) {
+                    case Constants.PAWN:
+                        pieceStr = "P";
+                        break;
+                    case Constants.KNIGHT:
+                        pieceStr = "N";
+                        break;
+                    case Constants.BISHOP:
+                        pieceStr = "B";
+                        break;
+                    case Constants.ROOK:
+                        pieceStr = "R";
+                        break;
+                    case Constants.QUEEN:
+                        pieceStr = "Q";
+                        break;
+                    case Constants.KING:
+                        pieceStr = "K";
+                        break;
+                    default:
+                        pieceStr = "X";
+                }
+                if (this.boardColors[i][j] == Constants.BLACK){
+                    pieceStr = pieceStr.toLowerCase();
+                }
+                returnStr += pieceStr + " ";
+            }
+            returnStr += "\n";
+        }
+        /*
         // board colors
         for (int[] row : this.boardColors) {
             for (int colorInt : row) {
@@ -608,7 +653,7 @@ class Board{
             }
             returnStr += "\n";
         }
-
+        */
         returnStr += "Num black pieces in this.blackPieces: " + this.blackPieces.size() + "\n";
         returnStr += "Num white pieces in this.blackPieces: " + this.blackPieces.size() + "\n";
 
