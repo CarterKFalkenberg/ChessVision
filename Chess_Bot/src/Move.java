@@ -26,6 +26,10 @@ public class Move {
         }
     }
 
+    public Move(){
+        
+    }
+
     @Override
     public String toString() {
         // e.g. "WPawn on B3 to B4"
