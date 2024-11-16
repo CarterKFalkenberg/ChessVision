@@ -8,8 +8,6 @@ public class EnPessant extends Move {
 
     public EnPessant(Piece piece, int start_row, int start_column, int end_row, int end_column, Piece pawnTaken){
         super(piece, start_row, start_column, end_row, end_column);
-        this.promotion = false;
-        this.enPassantSquare = new int[]{-1, -1};
         this.pawnTaken = pawnTaken;
     }
 
