@@ -27,6 +27,11 @@ public class Piece {
         return this.square;
     }
 
+    public void setSquare(int row, int col){
+        this.square[0] = row;
+        this.square[1] = col;
+    }
+
     public ArrayList<Move> getPossibleMoves(int[][] boardColors, int[] enPassantSquare){
         return null;
     }
