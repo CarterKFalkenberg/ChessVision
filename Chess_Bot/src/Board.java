@@ -3,6 +3,7 @@ package Chess_Bot.src;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import Chess_Bot.src.Pieces.Bishop;
 import Chess_Bot.src.Pieces.King;
@@ -83,7 +84,7 @@ class Board{
                         break;
 
                     case Constants.KING:
-                        piece = new King(row == 7, square);
+                        piece = new King(row == 7, square, true, true);
                         break;
                 
                     default:
@@ -164,21 +165,42 @@ class Board{
     void removeIllegalMoves(ArrayList<Move> moves) {
         // a theoretically possible move is illegal iff it results in the player who made that move ending up in check
             // EXCEPT for castling, need to check that! 
+        
+ 
+        List<Move> toRemove = new ArrayList<Move>();        
         for (Move move : moves) {
-            
-            // TODO: if the move is castling, remove if you do not have castling rights or if you are in check
-
-            // TODO: if you do have castling rights, additionally check if the king would be in check by
-                // moving 1 square in the castling direction (i.e. create a new move and check that)
-            
-            
             if (inCheck(move)){
-                moves.remove(move);
+                toRemove.add(move);
+                continue;
+            }
+
+            // if the move is castling, do additional checks
+            // remove if you are in check or if the king would be in check by moving 1 square in the castling direction 
+            if (move instanceof Castle){
+                if (this.inCheck()){
+                    toRemove.add(move);
+                    continue;
+                } 
+
+                int[] square = move.piece.getSquare();
+                Castle castle = (Castle) move;
+                int direction = castle.shortCastle ? 1 : -1; 
+                Move dummyMove = new Move(move.piece, square[0], square[1], square[0], square[1] + direction);
+                if (inCheck(dummyMove)){
+                    toRemove.add(move);
+                }
             }
         }
+        moves.removeAll(toRemove);
     }
 
     void makeMove(Move move) {
+
+        // TODO: implement castling and en passant 
+
+        if (move.piece.getType() == Constants.ROOK){
+            System.out.println("rook");
+        }
 
         // start square becomes empty
         this.boardColors[move.start_row][move.start_column] = Constants.EMPTY; 
@@ -218,6 +240,7 @@ class Board{
             this.boardPiecesObject.get(move.end_row).set(move.end_column, promoted);
             // castle rights are not affected via promotion
         } else {
+            move.piece.setSquare(move.end_row, move.end_column);
             this.boardPiecesInt[move.end_row][move.end_column] = move.piece.getType();
             this.boardPiecesObject.get(move.end_row).set(move.end_column, move.piece);
             updateCastleRights(move.piece, captured);
@@ -285,24 +308,110 @@ class Board{
     }
 
     boolean inCheck() {
-        return Board.inCheck(this.boardPiecesInt, this.boardColors, this.turnColor);
+        return this.inCheck(this.boardPiecesInt, this.boardColors, this.turnColor);
+    }
+
+    boolean inCheckCastle(Castle castle) {
+        int[][] boardPiecesIntCopy = this.deepCopy(this.boardPiecesInt);
+        int[][] boardColorsCopy = this.deepCopy(this.boardColors);
+        if (castle.piece.isWhitePiece()){
+            if (castle.shortCastle){
+                boardPiecesIntCopy[7][4] = Constants.EMPTY;
+                boardColorsCopy[7][4] = Constants.EMPTY;
+                boardPiecesIntCopy[7][5] = Constants.ROOK;
+                boardColorsCopy[7][5] = Constants.WHITE;
+                boardPiecesIntCopy[7][6] = Constants.KING;
+                boardColorsCopy[7][6] = Constants.WHITE;
+                boardPiecesIntCopy[7][7] = Constants.EMPTY;
+                boardColorsCopy[7][7] = Constants.EMPTY;
+            } else {
+                boardPiecesIntCopy[7][0] = Constants.EMPTY;
+                boardColorsCopy[7][0] = Constants.EMPTY;
+                boardPiecesIntCopy[7][2] = Constants.KING;
+                boardColorsCopy[7][2] = Constants.WHITE;
+                boardPiecesIntCopy[7][3] = Constants.ROOK   ;
+                boardColorsCopy[7][3] = Constants.WHITE;
+                boardPiecesIntCopy[7][4] = Constants.EMPTY;
+                boardColorsCopy[7][4] = Constants.EMPTY;
+            }
+        } else {
+            if (castle.shortCastle){
+                boardPiecesIntCopy[0][4] = Constants.EMPTY;
+                boardColorsCopy[0][4] = Constants.EMPTY;
+                boardPiecesIntCopy[0][5] = Constants.ROOK;
+                boardColorsCopy[0][5] = Constants.BLACK;
+                boardPiecesIntCopy[0][6] = Constants.KING;
+                boardColorsCopy[0][6] = Constants.BLACK;
+                boardPiecesIntCopy[0][7] = Constants.EMPTY;
+                boardColorsCopy[0][7] = Constants.EMPTY;
+            } else {
+                boardPiecesIntCopy[0][0] = Constants.EMPTY;
+                boardColorsCopy[0][0] = Constants.EMPTY;
+                boardPiecesIntCopy[0][2] = Constants.KING;
+                boardColorsCopy[0][2] = Constants.BLACK;
+                boardPiecesIntCopy[0][3] = Constants.ROOK;
+                boardColorsCopy[0][3] = Constants.BLACK;
+                boardPiecesIntCopy[0][4] = Constants.EMPTY;
+                boardColorsCopy[0][4] = Constants.EMPTY;
+            }
+        }
+        return this.inCheck(boardPiecesIntCopy, boardColorsCopy, castle.piece.pieceColor);
+    }
+
+    int[][] deepCopy(int[][] original){
+        int[][] copy = new int[original.length][];
+
+        for (int i = 0; i < original.length; i++) {
+            copy[i] = new int[original[i].length];
+            for (int j = 0; j < original[i].length; j++) {
+                copy[i][j] = original[i][j];
+            }
+        }
+        return copy;
+    }
+
+    boolean[][] deepCopy(boolean[][] original){
+        boolean[][] copy = new boolean[original.length][];
+
+        for (int i = 0; i < original.length; i++) {
+            copy[i] = new boolean[original[i].length];
+            for (int j = 0; j < original[i].length; j++) {
+                copy[i][j] = original[i][j];
+            }
+        }
+        return copy;
     }
 
     boolean inCheck(Move move) {
         /*
          * Check if current turn's player would be in check if they made a certain move
          */
-        // TODO: Does not currently support castling or en pessant or promotion
-        int[][] boardPiecesIntCopy = this.boardPiecesInt;
-        int[][] boardColorsCopy = this.boardColors;
+
+        if (move instanceof Castle){
+            return inCheckCastle((Castle) move);
+        }
+        
+        int[][] boardPiecesIntCopy = this.deepCopy(this.boardPiecesInt);
+        int[][] boardColorsCopy = this.deepCopy(this.boardColors);
         boardPiecesIntCopy[move.start_row][move.start_column] = Constants.EMPTY; 
         boardColorsCopy[move.start_row][move.start_column] = Constants.EMPTY; 
-        boardPiecesIntCopy[move.end_row][move.end_column] = move.piece.getType(); 
+        if (move.promotion){
+            // TODO: Does not currently support promotion to a knight
+            boardPiecesIntCopy[move.end_row][move.end_column] = Constants.QUEEN;
+        } else {
+            boardPiecesIntCopy[move.end_row][move.end_column] = move.piece.getType(); 
+        }
         boardColorsCopy[move.end_row][move.end_column] = move.piece.pieceColor; 
-        return Board.inCheck(boardPiecesIntCopy, boardColorsCopy, move.piece.pieceColor);
+        if (move instanceof EnPessant){
+            EnPessant enPessant = (EnPessant) move;
+            int[] takenSquare = enPessant.pawnTaken.getSquare();
+            boardPiecesIntCopy[takenSquare[0]][takenSquare[1]] = Constants.EMPTY;
+            boardColorsCopy[takenSquare[0]][takenSquare[1]] = Constants.EMPTY;
+        }
+        return this.inCheck(boardPiecesIntCopy, boardColorsCopy, move.piece.pieceColor);
     }
 
-    static boolean inCheck(int[][] boardPiecesInt, int[][] boardColors, int color) {
+    boolean inCheck(int[][] boardPiecesInt, int[][] boardColors, int color) {
         /*
          * Check if color is in check
         */
@@ -318,6 +427,9 @@ class Board{
                     break A;
                 }
             }
+        }
+        if (kingRow == -1 || kingCol == -1) {
+            throw new IndexOutOfBoundsException("King is not on board");
         }
 
         // THE ONLY WAYS YOU CAN BE IN CHECK ARE FROM A KNIGHT, A STRAIGHT PATH PIECE, OR A DIAGONAL PATH PIECE
@@ -341,7 +453,7 @@ class Board{
         return false;
     }
 
-    static boolean inCheckByKnight(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
+    boolean inCheckByKnight(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
         // color: The color of the KING potentially in check
         int row, col;
     
@@ -403,7 +515,7 @@ class Board{
         return false;
     }
 
-    static boolean inCheckFromStraightPath(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
+    boolean inCheckFromStraightPath(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
 
         // forwards
         int row = kingRow + 1; 
@@ -464,7 +576,7 @@ class Board{
         return false;
     }
 
-    static boolean inCheckFromDiagonalPath(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
+    boolean inCheckFromDiagonalPath(int[][] boardPiecesInt, int[][] boardColors, int color, int kingRow, int kingCol){
         
         // forwards right
         int row = kingRow + 1; 
@@ -567,7 +679,8 @@ class Board{
             this.enPassantSquare = new int[2];
          */
         
-        String returnStr = "-| A B C D E F G H\n";
+        String returnStr = "----------------------------------------------------------------\n";
+        returnStr += "-| A B C D E F G H\n";
         returnStr += "------------------\n";
 
         // uppercase: white, lowercase: black
@@ -654,10 +767,19 @@ class Board{
             returnStr += "\n";
         }
         */
+        if (this.turnColor == Constants.WHITE){
+            returnStr += "White to play\n";
+        } else {
+            returnStr += "Black to play\n";
+        }
+        
         returnStr += "Num black pieces in this.blackPieces: " + this.blackPieces.size() + "\n";
         returnStr += "Num white pieces in this.blackPieces: " + this.blackPieces.size() + "\n";
 
-        returnStr += "En passant square: (" + this.enPassantSquare[0] + ", " + this.enPassantSquare[1] + ")";
+        if (this.enPassantSquare[0] != -1){
+            returnStr += "En passant square: (" + this.enPassantSquare[0] + ", " + this.enPassantSquare[1] + ")";
+        }
+        returnStr += "----------------------------------------------------------------\n";
 
         return returnStr;
 
